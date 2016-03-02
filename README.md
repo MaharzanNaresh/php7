@@ -357,10 +357,10 @@ Indirect variable, property and method references are now interpreted with left-
 ```php
 <?php
 
-    $$foo['bar']['baz'] // interpreted as ($$foo)['bar']['baz']
-    $foo->$bar['baz']   // interpreted as ($foo->$bar)['baz']
-    $foo->$bar['baz']() // interpreted as ($foo->$bar)['baz']()
-    Foo::$bar['baz']()  // interpreted as (Foo::$bar)['baz']()
+$$foo['bar']['baz'] // interpreted as ($$foo)['bar']['baz']
+  $foo->$bar['baz']   // interpreted as ($foo->$bar)['baz']
+  $foo->$bar['baz']() // interpreted as ($foo->$bar)['baz']()
+  Foo::$bar['baz']()  // interpreted as (Foo::$bar)['baz']()
 ```
 To restore the previous behavior add explicit curly braces:
 
@@ -409,7 +409,6 @@ will now throw a strict standards error regardless of whether parentheses are us
 
 
 **By-reference assignment ordering**
-
 Array elements or object properties that are automatically created during by-reference assignments will now result in a different order. For example
 
 ```php
@@ -447,3 +446,200 @@ will now result in `$array == [1, 2, 3]` rather than `[3, 2, 1]`. Note that only
   // $a = 1; $b = 2; $c = 3;
 ```
 will retain its current behavior.
+
+
+**Empty list assignments**
+Empty list() assignments are no longer allowed. As such all of the following are invalid:
+
+```php
+<?php
+
+
+  list() = $a;
+  list(,,) = $a;
+  list($x, list(), $y) = $a;
+```
+`list()` no longer supports unpacking strings (while previously this was only supported in some cases). The code
+
+```php
+<?php
+
+$string = "xy";
+list($x, $y) = $string;
+```
+will now result in `$x == null and $y == null` (without notices) instead of `$x == “x” and $y == “y”`. Furthermore list() is now always guaranteed to work with objects implementing ArrayAccess, e.g.
+
+```php
+<?php
+
+ list($a, $b) = (object) new ArrayObject([0, 1]);
+```
+will now result in `$a == 0 and $b == 1`. Previously both `$a and $b` were null.
+
+**foreach behavior**
+
+*Interaction with internal array pointers*
+
+Iteration with foreach() no longer has any effect on the internal array pointer, which can be accessed through the current()/next()/etc family of functions. For example
+
+```php
+
+<?php
+
+
+  $array = [0, 1, 2];
+  foreach ($array as &$val) {
+      var_dump(current($array));
+  }
+
+```
+will now print the value int(0) three times. Previously the output was int(1), int(2) and bool(false).
+
+*Array iteration by-value*
+
+When iterating arrays by-value, foreach will now always operate on a copy of the array, as such changes to the array during iteration will not influence iteration behavior. For example
+
+```php
+
+<?php
+
+
+  $array = [0, 1, 2];
+  $ref =& $array; // Necessary to trigger the old behavior
+  foreach ($array as $val) {
+      var_dump($val);
+      unset($array[1]);
+  }
+
+```
+will now print all three elements (0 1 2), while previously the second element 1 was skipped (0 2).
+
+
+*Array iteration by-reference*
+
+When iterating arrays by-reference, modifications to the array will continue to influence the iteration. However PHP will now do a better job of maintaining a correct position in a number of cases. E.g. appending to an array during by-reference iteration
+
+```php
+
+<?php
+
+
+  $array = [0];
+  foreach ($array as &$val) {
+      var_dump($val);
+      $array[1] = 1;
+  }
+
+```
+will now iterate over the appended element as well. As such the output of this example will now be `“int(0) int(1)”`, while previously it was only `“int(0)”`.
+
+
+**Parameter handling**
+
+*Duplicate parameter names*
+
+It is no longer possible to define two function parameters with the same name. For example, the following method will trigger a compile-time error:
+
+```php
+
+<?php
+
+
+  public function foo($a, $b, $unused, $unused) {
+      // ...
+  }
+
+```
+
+Code like this should be changed to use distinct parameter names, for example:
+
+```php
+<?php
+
+
+  public function foo($a, $b, $unused1, $unused2) {
+      // ...
+  }
+```
+
+*Retrieving argument values*
+
+The `func_get_arg()` and `func_get_args()` functions will no longer return the original value that was passed to a parameter and will instead provide the current value (which might have been modified). For example
+
+```php
+
+<?php
+
+
+  function foo($x) {
+      $x++;
+      var_dump(func_get_arg(0));
+  }
+  foo(1);
+```
+will now print “2” instead of “1”. This code should be changed to either perform modifications only after calling `func_get_arg(s)`
+
+```php
+<?php
+
+
+  function foo($x) {
+      var_dump(func_get_arg(0));
+      $x++;
+  }
+```
+or avoid modifying the parameters altogether:
+
+```php
+<?php
+
+  function foo($x) {
+      $newX = $x + 1;
+      var_dump(func_get_arg(0));
+  }
+```
+*Effect on backtraces*
+
+Similarly exception backtraces will no longer display the original value that was passed to a function and show the modified value instead. For example
+
+```php
+<?php
+
+
+  function foo($x) {
+      $x = 42;
+      throw new Exception;
+  }
+  foo("string");
+
+```
+will now result in the stack trace
+
+```php
+
+  Stack trace:
+  #0 file.php(4): foo(42)
+  #1 {main}
+
+```
+while previously it was:
+
+```php
+
+  Stack trace:
+  #0 file.php(4): foo('string')
+  #1 {main}
+
+```
+While this should not impact runtime behavior of your code, it is worthwhile to be aware of this difference for debugging purposes.
+
+The same limitation also applies to `debug_backtrace()` and other functions inspecting function arguments.
+
+**Standard Library Changes**
+
+* `substr()` now returns an empty string instead of `FALSE` when the truncation happens on boundaries.
+* `call_user_method()` and `call_user_method_array()` no longer exists.
+* `ob_start()` no longer issues an `E_ERROR`, but instead an `E_RECOVERABLE_ERROR` in case an output buffer is created in an output buffer handler.
+* The internal sorting algorithm has been improved, what may result in different sort order of elements that compare as equal.
+* Removed `dl()` function on fpm-fcgi.
+* `setcookie()` with an empty cookie name now issues an `E_WARNING` and doesn’t send an empty set-cookie header line anymore.
