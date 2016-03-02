@@ -471,6 +471,7 @@ will now throw a strict standards error regardless of whether parentheses are us
 
 
 **By-reference assignment ordering**
+
 Array elements or object properties that are automatically created during by-reference assignments will now result in a different order. For example
 
 ```php
