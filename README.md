@@ -51,19 +51,9 @@ PHP’s flexible type system is one of its most-useful features, allowing numeri
 
 declare(strict_types=1);
 ```
-Here’s a table showing which scalar types are accepted in “Coercive” mode based on the declared type:
-| Type declaration  | int  | float  | string   | bool   | object |
-|---|---|---|---|---|---|
-| int  |  yes |  yes* | yes†  | yes  | no  |
-| float  | yes  | yes  | yes†  | yes  | no  |
-| string | yes  | yes  | yes  | yes  | yes†   |
-| bool  | yes  |  yes | yes  | yes  | no   |
+![Typehint][logo]
 
- * Only non-NaN floats between PHP_INT_MIN and PHP_INT_MAX accepted.
-
- † If it’s a numeric string
-
- ‡ Only if object has a __toString() method
+[logo]: https://github.com/MaharzanNaresh/php7/blob/markdown-prep/typehint.png "Type Hint"
 
 b. **Return type declarations**
 
@@ -83,15 +73,9 @@ This snippet will run without warnings and the returned value will be converted 
 
     Fatal error: Uncaught TypeError: Return value of a() must be of the type boolean, integer returned
 
-Allowed types, strict mode
-| Type declaration  | int  | float  | string   | bool   | object |
-|---|---|---|---|---|---|
-| int  |  yes |  no | no  | no  | no  |
-| float  | yes*  | yes  | no  | no  | no  |
-| string | no  | no  | yes  | no  | no   |
-| bool  | no  |  no | no  | yes  | no   |
+![ReturnTypeDeclaration][logo]
 
-* Allowed due to widening primitive conversion
+[logo]: https://github.com/MaharzanNaresh/php7/blob/markdown-prep/returnTypeDeclarations.png "ReturnTypeDeclaration"
 
 
 c. **Anonymous classes**
