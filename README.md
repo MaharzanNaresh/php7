@@ -14,11 +14,13 @@ We will be covering following topics
 	 * Null coalesce operator
 	 * Throwables
  2. Deprecations & Removals
+ 3. Syntax Changes
+
 
 **New Features**
 ----------------
 
-a. **Scalar type hints**
+**a. Scalar type hints**
 
 PHP 5 introduced the ability to require function parameters to be of a certain type. This provides a safeguard against invalid uses, like passing a UNIX timestamp to a method which expects a DateTime object. It also makes it clear to other developers how the function should be used. For example, compare the following method signatures with and without type hints:
 
@@ -53,7 +55,7 @@ declare(strict_types=1);
 
 [logo]: https://github.com/MaharzanNaresh/php7/blob/markdown-prep/typehint.png "Type Hint"
 
-b. **Return type declarations**
+**b. Return type declarations**
 
 Another important new feature coming with PHP 7 is the ability to define the return type of methods and functions, and it behaves in the same fashion as scalar type hints in regards of coercion and strict mode:
 
@@ -76,7 +78,7 @@ This snippet will run without warnings and the returned value will be converted 
 [logo]: https://github.com/MaharzanNaresh/php7/blob/markdown-prep/returnTypeDeclarations.png "ReturnTypeDeclaration"
 
 
-c. **Anonymous classes**
+**c. Anonymous classes**
 
 For some time PHP has featured anonymous function support in the shape of Closures; PHP7 introduces the same kind of functionality for objects of an anonymous class.
 
@@ -139,9 +141,9 @@ function retriveSumObject()
 var_dump(retriveSumObject()->getSum(1,2)); //int(3)
 ```
 
-d. **The space ship operator**
+**d. The space ship operator**
 
-PHP 7 introduces a new three-way comparison operator <=> (T_SPACESHIP) which takes two expressions: (expr) <=> (expr). It compares both sides of the expression and, depending on the result, returns one of three values:
+PHP 7 introduces a new three-way comparison operator `<=>` `(T_SPACESHIP)` which takes two expressions: `(expr) <=> (expr)`. It compares both sides of the expression and, depending on the result, returns one of three values:
 
 | Return Value  |  Reason |
 |---|---|
@@ -258,7 +260,7 @@ usort($spaceships, function ($ship1, $ship2) {
 });
 ```
 
-e. **Null coalesce operator**
+ **e.Null coalesce operator**
 
 The null coalesce operator ( ?? ) also works as a shortcut for a common use case: a conditional attribution that checks if a value is set before using it. In PHP 5, we would usually do something like this:
 
@@ -286,9 +288,9 @@ $x = ["yarr" => "meaningful_value"];
 var_dump($x["aharr"] ?? $x["waharr"] ?? $x["yarr"]); // string(16) "meaningful_value"
 ```
 
-f. **Throwables**
+ **f.Throwables**
 
-PHP 7 has introduced exceptions as a replacement for fatal or recoverable fatal errors. These exceptions do not extend Exception, but instead extend a new class BaseException and are named EngineException, TypeException, and ParseException.
+PHP 7 has introduced exceptions as a replacement for fatal or recoverable fatal errors. These exceptions do not extend `Exception`, but instead extend a new class `BaseException` and are named `EngineException`, `TypeException`, and `ParseException`.
 
 ```php
 <?php
@@ -304,13 +306,13 @@ try {
 }
 ```
 
-The code above will not catch the TypeException thrown due to the mis-matched type-hint, resulting in the following message to the user:
+The code above will not catch the `TypeException` thrown due to the mis-matched type-hint, resulting in the following message to the user:
 
     Fatal error: Uncaught TypeException: Argument 1 passed to add() must be of the type integer, string given
 
-The reason an object named TypeException would not be caught by catch (Exception $e) is not obvious. The Exception suffix implies that TypeException extends Exception. If the name of the thrown class was TypeError it would be much clearer that the class does not extend Exception, but rather is part of a different class hierarchy that must be caught separately.
+The reason an object named `TypeException` would not be caught by `catch (Exception $e)` is not obvious. The Exception suffix implies that `TypeException` extends `Exception`. If the name of the thrown class was TypeError it would be much clearer that the class does not `extend Exception`, but rather is part of a different class hierarchy that must be caught separately.
 
-To catch the TypeException, the user must write code like this:
+To catch the `TypeException`, the user must write code like this:
 
 ```php
 <?php
@@ -339,7 +341,7 @@ The new exception hierarchy in PHP 7 is as follows:
             * DivisionByZeroError extends ArithmeticError
 		        * AssertionError extends Error
 
-Throwable interface
+Throwable interface signature
 
 ```php
 <?php
@@ -363,7 +365,7 @@ interface Throwable
 
 A number of deprecated items have been removed. Because they’ve been deprecated for some time now, hopefully you aren’t using them! This might, however, have an impact on legacy applications.
 
-In particular, ASP-style tags ( <%, <%= and %> ), were removed along with script tags `( <script language=”php”> )`. Make sure you are using the recommended `<?php` tag instead. Other functions that were previously deprecated, like split, have also been removed in PHP 7.
+In particular, ASP-style tags `( <%, <%= and %> )`, were removed along with script tags `( <script language=”php”> )`. Make sure you are using the recommended `<?php` tag instead. Other functions that were previously deprecated, like split, have also been removed in PHP 7.
 
 The ereg extension (and all ereg_* functions) have been deprecated since PHP 5.3. It should be replaced with the PCRE extension (preg_* functions), which offers many more features. The mysql extension (and the mysql_* functions) have been deprecated since PHP 5.5. For a direct migration, you can use the mysqli extension and the mysqli_* functions instead.
 
@@ -494,7 +496,14 @@ will now result in `$a == 0 and $b == 1`. Previously both `$a and $b` were null.
 
 **foreach behavior**
 
+
+
+----------
+
 *Interaction with internal array pointers*
+
+
+----------
 
 Iteration with foreach() no longer has any effect on the internal array pointer, which can be accessed through the current()/next()/etc family of functions. For example
 
@@ -511,7 +520,13 @@ Iteration with foreach() no longer has any effect on the internal array pointer,
 ```
 will now print the value int(0) three times. Previously the output was int(1), int(2) and bool(false).
 
+
+
+----------
 *Array iteration by-value*
+
+
+----------
 
 When iterating arrays by-value, foreach will now always operate on a copy of the array, as such changes to the array during iteration will not influence iteration behavior. For example
 
@@ -531,7 +546,12 @@ When iterating arrays by-value, foreach will now always operate on a copy of the
 will now print all three elements (0 1 2), while previously the second element 1 was skipped (0 2).
 
 
+
+----------
 *Array iteration by-reference*
+
+
+----------
 
 When iterating arrays by-reference, modifications to the array will continue to influence the iteration. However PHP will now do a better job of maintaining a correct position in a number of cases. E.g. appending to an array during by-reference iteration
 
@@ -552,7 +572,13 @@ will now iterate over the appended element as well. As such the output of this e
 
 **Parameter handling**
 
+
+
+----------
 *Duplicate parameter names*
+
+
+----------
 
 It is no longer possible to define two function parameters with the same name. For example, the following method will trigger a compile-time error:
 
@@ -578,7 +604,13 @@ Code like this should be changed to use distinct parameter names, for example:
   }
 ```
 
+
+
+----------
 *Retrieving argument values*
+
+
+----------
 
 The `func_get_arg()` and `func_get_args()` functions will no longer return the original value that was passed to a parameter and will instead provide the current value (which might have been modified). For example
 
@@ -614,7 +646,14 @@ or avoid modifying the parameters altogether:
       var_dump(func_get_arg(0));
   }
 ```
+
+
+
+----------
 *Effect on backtraces*
+
+
+----------
 
 Similarly exception backtraces will no longer display the original value that was passed to a function and show the modified value instead. For example
 
