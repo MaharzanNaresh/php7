@@ -7,12 +7,12 @@ PHP 7 is finally out there with 100 percent improvement in performance speed ove
 We will be covering following topics
 
  1. New Features
-	a. Scalar type hints
-	b. Return type declarations
-	c. Anonymous classes
-	d. The space ship operator
-	e. Null coalesce operator
-	f. Throwables
+	 * Scalar type hints
+	 *  Return type declarations
+	 * Anonymous classes
+	 * The space ship operator
+	 * Null coalesce operator
+	 * Throwables
  2. Deprecations & Removals
  3. Syntax Changes
 
