@@ -340,3 +340,109 @@ The new exception hierarchy in PHP 7 is as follows:
         * ArithmeticError extends Error
             * DivisionByZeroError extends ArithmeticError
 		        * AssertionError extends Error
+
+
+**Deprecations & Removals**
+----------------
+
+A number of deprecated items have been removed. Because they’ve been deprecated for some time now, hopefully you aren’t using them! This might, however, have an impact on legacy applications.
+
+In particular, ASP-style tags ( <%, <%= and %> ), were removed along with script tags `( <script language=”php”> )`. Make sure you are using the recommended `<?php` tag instead. Other functions that were previously deprecated, like split, have also been removed in PHP 7.
+
+The ereg extension (and all ereg_* functions) have been deprecated since PHP 5.3. It should be replaced with the PCRE extension (preg_* functions), which offers many more features. The mysql extension (and the mysql_* functions) have been deprecated since PHP 5.5. For a direct migration, you can use the mysqli extension and the mysqli_* functions instead.
+
+**Left-to-right parsing**
+
+Indirect variable, property and method references are now interpreted with left-to-right semantics. Some examples:
+```php
+<?php
+
+$$foo['bar']['baz'] // interpreted as ($$foo)['bar']['baz']
+  $foo->$bar['baz']   // interpreted as ($foo->$bar)['baz']
+  $foo->$bar['baz']() // interpreted as ($foo->$bar)['baz']()
+  Foo::$bar['baz']()  // interpreted as (Foo::$bar)['baz']()
+```
+To restore the previous behavior add explicit curly braces:
+
+```php
+<?php
+
+  ${$foo['bar']['baz']}
+  $foo->{$bar['baz']}
+  $foo->{$bar['baz']}()
+  Foo::{$bar['baz']}()
+```
+
+**Global Keywords**
+
+The global keyword now only accepts simple variables. Instead of
+
+```php
+<?php
+
+ global $$foo->bar;
+```
+it is now required to write the following:
+```php
+<?php
+
+global ${$foo->bar};
+```
+
+
+**Parenthesis influencing behavior**
+
+Parentheses around variables or function calls no longer have any influence on behavior. For example the following code, where the result of a function call is passed to a by-reference function
+
+```php
+<?php
+
+function getArray() { return [1, 2, 3]; }
+
+  $last = array_pop(getArray());
+  // Strict Standards: Only variables should be passed by reference
+  $last = array_pop((getArray()));
+  // Strict Standards: Only variables should be passed by reference
+```
+
+will now throw a strict standards error regardless of whether parentheses are used. Previously no notice was generated in the second case.
+
+
+**By-reference assignment ordering**
+Array elements or object properties that are automatically created during by-reference assignments will now result in a different order. For example
+
+```php
+<?php
+
+  $array = [];
+  $array["a"] =& $array["b"];
+  $array["b"] = 1;
+  var_dump($array);
+```
+now results in the array `[“a” ⇒ 1, “b” ⇒ 1]`, while previously the result was `[“b” ⇒ 1, “a” ⇒ 1]`;
+
+
+
+**list() behavior**
+
+Variable assignment order
+`list()` will no longer assign variables in reverse order. For example
+
+
+```php
+<?php
+
+list($array[], $array[], $array[]) = [1, 2, 3];
+  var_dump($array);
+```
+will now result in `$array == [1, 2, 3]` rather than `[3, 2, 1]`. Note that only the order of the assignments changed, but the assigned values stay the same. E.g. a normal usage like
+
+```php
+
+<?php
+
+
+  list($a, $b, $c) = [1, 2, 3];
+  // $a = 1; $b = 2; $c = 3;
+```
+will retain its current behavior.
