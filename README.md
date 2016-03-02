@@ -14,8 +14,6 @@ We will be covering following topics
 	 * Null coalesce operator
 	 * Throwables
  2. Deprecations & Removals
- 3. Syntax Changes
-
 
 **New Features**
 ----------------
