@@ -341,6 +341,24 @@ The new exception hierarchy in PHP 7 is as follows:
             * DivisionByZeroError extends ArithmeticError
 		        * AssertionError extends Error
 
+Throwable interface
+
+```php
+<?php
+
+interface Throwable
+{
+    public function getMessage();
+    public function getCode();
+    public function getFile();
+    public function getLine();
+    public function getTrace();
+    public function getTraceAsString();
+    public function getPrevious();
+    public function __toString();
+}
+
+```
 
 **Deprecations & Removals**
 ----------------
