@@ -357,10 +357,10 @@ Indirect variable, property and method references are now interpreted with left-
 ```php
 <?php
 
-$$foo['bar']['baz'] // interpreted as ($$foo)['bar']['baz']
-  $foo->$bar['baz']   // interpreted as ($foo->$bar)['baz']
-  $foo->$bar['baz']() // interpreted as ($foo->$bar)['baz']()
-  Foo::$bar['baz']()  // interpreted as (Foo::$bar)['baz']()
+    $$foo['bar']['baz'] // interpreted as ($$foo)['bar']['baz']
+    $foo->$bar['baz']   // interpreted as ($foo->$bar)['baz']
+    $foo->$bar['baz']() // interpreted as ($foo->$bar)['baz']()
+    Foo::$bar['baz']()  // interpreted as (Foo::$bar)['baz']()
 ```
 To restore the previous behavior add explicit curly braces:
 
@@ -409,6 +409,7 @@ will now throw a strict standards error regardless of whether parentheses are us
 
 
 **By-reference assignment ordering**
+
 Array elements or object properties that are automatically created during by-reference assignments will now result in a different order. For example
 
 ```php
