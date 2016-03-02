@@ -13,14 +13,15 @@ We will be covering following topics
 	 * The space ship operator
 	 * Null coalesce operator
 	 * Throwables
+	 * Constant arrays using define()
+	 * Group use declarations
  2. Deprecations & Removals
- 3. Syntax Changes
 
 
 **New Features**
 ----------------
 
-**a. Scalar type hints**
+**Scalar type hints**
 
 PHP 5 introduced the ability to require function parameters to be of a certain type. This provides a safeguard against invalid uses, like passing a UNIX timestamp to a method which expects a DateTime object. It also makes it clear to other developers how the function should be used. For example, compare the following method signatures with and without type hints:
 
@@ -55,7 +56,7 @@ declare(strict_types=1);
 
 [logo]: https://github.com/MaharzanNaresh/php7/blob/markdown-prep/typehint.png "Type Hint"
 
-**b. Return type declarations**
+**Return type declarations**
 
 Another important new feature coming with PHP 7 is the ability to define the return type of methods and functions, and it behaves in the same fashion as scalar type hints in regards of coercion and strict mode:
 
@@ -78,7 +79,7 @@ This snippet will run without warnings and the returned value will be converted 
 [logo]: https://github.com/MaharzanNaresh/php7/blob/markdown-prep/returnTypeDeclarations.png "ReturnTypeDeclaration"
 
 
-**c. Anonymous classes**
+**Anonymous classes**
 
 For some time PHP has featured anonymous function support in the shape of Closures; PHP7 introduces the same kind of functionality for objects of an anonymous class.
 
@@ -141,7 +142,7 @@ function retriveSumObject()
 var_dump(retriveSumObject()->getSum(1,2)); //int(3)
 ```
 
-**d. The space ship operator**
+**The space ship operator**
 
 PHP 7 introduces a new three-way comparison operator `<=>` `(T_SPACESHIP)` which takes two expressions: `(expr) <=> (expr)`. It compares both sides of the expression and, depending on the result, returns one of three values:
 
@@ -260,7 +261,7 @@ usort($spaceships, function ($ship1, $ship2) {
 });
 ```
 
- **e.Null coalesce operator**
+ **Null coalesce operator**
 
 The null coalesce operator ( ?? ) also works as a shortcut for a common use case: a conditional attribution that checks if a value is set before using it. In PHP 5, we would usually do something like this:
 
@@ -288,7 +289,7 @@ $x = ["yarr" => "meaningful_value"];
 var_dump($x["aharr"] ?? $x["waharr"] ?? $x["yarr"]); // string(16) "meaningful_value"
 ```
 
- **f.Throwables**
+ **Throwables**
 
 PHP 7 has introduced exceptions as a replacement for fatal or recoverable fatal errors. These exceptions do not extend `Exception`, but instead extend a new class `BaseException` and are named `EngineException`, `TypeException`, and `ParseException`.
 
@@ -358,6 +359,49 @@ interface Throwable
     public function __toString();
 }
 
+```
+
+**Constant arrays using define()**
+
+Array constants can now be defined with `define()`. In PHP 5.6, they could only be defined with const.
+
+```php
+<?php
+
+define('FHF', [
+    'Achyut',
+    'Bipen',
+    'Suresh',
+    'Naresh'
+]);
+
+echo FHF[1];// output Bipen
+```
+
+**Group use declarations**
+
+Classes, functions and constants being imported from the same namespace can now be grouped together in a single use statement.
+
+```php
+<?php
+// Pre PHP 7 code
+use some\namespace\ClassA;
+use some\namespace\ClassB;
+use some\namespace\ClassC as C;
+
+use function some\namespace\fn_a;
+use function some\namespace\fn_b;
+use function some\namespace\fn_c;
+
+use const some\namespace\ConstA;
+use const some\namespace\ConstB;
+use const some\namespace\ConstC;
+
+// PHP 7+ code
+use some\namespace\{ClassA, ClassB, ClassC as C};
+use function some\namespace\{fn_a, fn_b, fn_c};
+use const some\namespace\{ConstA, ConstB, ConstC};
+?>
 ```
 
 **Deprecations & Removals**
@@ -698,3 +742,24 @@ The same limitation also applies to `debug_backtrace()` and other functions insp
 * The internal sorting algorithm has been improved, what may result in different sort order of elements that compare as equal.
 * Removed `dl()` function on fpm-fcgi.
 * `setcookie()` with an empty cookie name now issues an `E_WARNING` and doesn’t send an empty set-cookie header line anymore.
+
+
+**Invalid class, interface and trait names**
+
+The following names cannot be used to name classes, interfaces or traits:
+
+    bool
+    int
+    float
+    string
+    NULL
+    TRUE
+    FALSE
+
+Furthermore, the following names should not be used. Although they will not generate an error in PHP 7.0, they are reserved for future use and should be considered deprecated.
+
+    resource
+    object
+    mixed
+    numeric
+
